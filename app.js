@@ -35,13 +35,13 @@ if (cluster.isPrimary) {
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: '',//mpc@gmail.com?
-                pass: ''//this would have to change too.
+                user: 'keatingc88@gmail.com',//mpc@gmail.com?
+                pass: 'xmzt eobz jzji mysm'//this would have to change too.
             }
         });
         let code = bcrypt.hashSync(req.params.to, 16)
         var mailOptions = {
-            from: '',
+            from: 'keatingc88@gmail.com',
             to: `${req.params.to}`,
             subject: 'MPC Registration Email',
             text: `Confirmation Link: https://localhost:7202/${code}`//What should this be????
