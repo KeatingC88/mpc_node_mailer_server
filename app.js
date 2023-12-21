@@ -1,13 +1,14 @@
 `use strict`
-const { Worker, isMainThread, parentPort, workerData } = require('worker_threads')
 const path = require('path')
-const express = require("express")
+const express = require(`express`)
 const cluster = require(`node:cluster`)
 const totalCPUs = require("os").cpus().length
-const bcrypt = require('bcrypt')
-const nodemailer = require("nodemailer")
+const bcrypt = require(`bcrypt`)
+const puppeteer = require(`puppeteer`)
+const nodemailer = require(`nodemailer`)
+const axios = require(`axios`)
 const port = 8081
-
+//const { Worker, isMainThread, parentPort, workerData } = require('worker_threads')
 if (cluster.isPrimary) {
     for (let i = 0; i < totalCPUs; i++) {
         cluster.fork()
@@ -19,6 +20,7 @@ if (cluster.isPrimary) {
     const app = express()
     app.use(express.static('client/build'))
     app.use(express.json())
+    
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*")
         res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
@@ -28,6 +30,48 @@ if (cluster.isPrimary) {
 
     app.get('*', (req, res) => {
         res.send(JSON.stringify(`Server Ready...`))
+    })
+
+    app.post("/api/send_confirmation_phone/:country/:telephone/:carrier", async (req, res) => {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'keatingc88@gmail.com',//mpc@gmail.com?
+                pass: 'xmzt eobz jzji mysm'//this would have to change too.
+            }
+        })
+
+        const code = bcrypt.hashSync(req.params.carrier + req.params.telephone + req.params.country, 16)
+
+        const mailOptions = {
+            from: 'keatingc88@gmail.com',
+            to: `${req.params.telephone}@${req.params.carrier}`,//${req.params.country}//does not work for some reason.
+            subject: 'MPC Registration Phone',
+            text: `Confirmation Link: http://localhost:3000/register_password?country=${req.params.country}&tel=${req.params.telephone}&carrier=${req.params.carrier}&code=${code}`
+        }
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log('SMS sent: ' + info.response)
+            }
+        })
+
+        res.setHeader("Content-Type", "application/json")
+        res.status(200)
+        res.send(JSON.stringify(`${code}`))
+    })
+
+    app.post("/api/receive_confirmation_phone/:country/:telephone/:carrier/:code", async (req, res) => {
+        res.setHeader("Content-Type", "application/json")
+        if (!bcrypt.compareSync(req.params.carrier + req.params.telephone + req.params.country, req.params.code)) {
+            res.status(401)
+            res.send(false)
+        } else {
+            res.status(200)
+            res.send(true)
+        }
     })
 
     app.post("/api/send_confirmation_email/:to", async (req, res) => {
@@ -45,7 +89,7 @@ if (cluster.isPrimary) {
             from: 'keatingc88@gmail.com',
             to: `${req.params.to}`,
             subject: 'MPC Registration Email',
-            text: `Confirmation Link: http://localhost:3000/RegisterComplete?email=${req.params.to}&code=${code}`
+            text: `Confirmation Link: http://localhost:3000/PasswordRegister?email=${req.params.to}&code=${code}`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
@@ -88,7 +132,7 @@ if (cluster.isPrimary) {
             from: 'keatingc88@gmail.com',
             to: `${req.params.to}`,
             subject: 'MPC Registration Email',
-            text: `Password Reset Link: http://localhost:3000/PasswordReset?email=${req.params.to}&code=${code} this expires in 15 minutes.`
+            text: `Password Reset Link: http://localhost:3000/register_password?email=${req.params.to}&code=${code} this expires in 15 minutes.`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
@@ -106,6 +150,7 @@ if (cluster.isPrimary) {
 
     app.listen(port, () => console.log(`Server is running successfully on PORT ${port}`))
 }
+
 /*if (isMainThread) {
 
     const app = express()
@@ -130,132 +175,6 @@ if (cluster.isPrimary) {
     parentPort.postMessage({id: id})
     process.exit()
 }*/
-
-
-/*if (cluster.isPrimary) {
-
-    const app = express()
-    app.get('*', (req, res) => {
-        res.send(JSON.stringify(`Server Listening on PORT ${port}...`))
-        console.log(`foobar`)
-    })
-    app.listen(port, () => console.log(`Server is running successfully on PORT ${port}`))
-
-    for (let i = 0; i < totalCPUs; i++) {
-        var worker = cluster.fork()
-        worker.send({id: i})
-        console.log(`Cluster: ${i} has loaded.`)        
-    }
-} else {
-    process.on(`message`, ({ id }) => {
-
-        console.log(`workerID: ${id}`)
-        process.send({id: id})
-        process.exit()
-
-    })
-}*/
-
-
-/*const app = express()
-app.use(express.static('client/build'))
-app.use(express.json())
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-    next()
-})
-
-
-
-app.get('*', (req, res) => {
-    res.send(JSON.stringify(`Server Ready...`))
-})
-
-app.post("/api/confirmation_email/:to", async (req, res) => {
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'keatingc88@gmail.com',//mpc@gmail.com?
-            pass: 'xmzt eobz jzji mysm'//this would have to change too.
-        }
-    })
-
-    let code = bcrypt.hashSync(req.params.to, 16)
-    console.log(`Emailing to ${req.params.to} and returning Code:${code}...\n`)
-
-    var mailOptions = {
-        from: 'keatingc88@gmail.com',
-        to: `${req.params.to}`,
-        subject: 'MPC Registration Email',
-        text: `Confirmation Link: http://localhost:3000/RegisterComplete?email=${req.params.to}&code=${code}`
-    }
-
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log('Email sent: ' + info.response)
-        }
-    })
-
-    res.setHeader("Content-Type", "application/json")
-    res.status(200)
-    res.send(JSON.stringify(`${code}`))
-})
-
-app.post("/api/email_check_in/:email/:code", async (req, res) => {
-
-    console.log(req.params.email)
-    console.log(req.params.code)
-    console.log(bcrypt.compareSync(`${req.params.email}`, `${req.params.code}`))
-
-    if (!bcrypt.compareSync(`${req.params.email}`, `${req.params.code}`)) {
-        console.log(`carter`)
-        res.setHeader("Content-Type", "application/json")
-        res.status(401)
-        res.send(false)
-    } else {
-        console.log(`lee`)
-        res.setHeader("Content-Type", "application/json")
-        res.status(200)
-        res.send(true)
-    }
-})
-
-app.post("/api/reset_password/:to", async (req, res) => {
-
-
-
-    res.setHeader("Content-Type", "application/json")
-    res.status(200)
-    res.send(JSON.stringify(`Email password reset has been sent to ${req.params.to}!`))
-
-})
-
-app.listen(port, () => console.log(`Server process ID ${process.pid} is running successfully on PORT ${port}`))*/
-
-/*const app = express()
-app.use(express.static('client/build'))
-app.use(express.json())
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-    next()
-})
-
-
-
-app.get('*', (req, res) => {
-    res.send(JSON.stringify(`Server Ready...`))
-})
-
-app.listen(port, () => console.log(`Server is running successfully on PORT ${port}`))*/
-
-
-
 /*if (isMainThread) {
     console.log(`main thread began with cpus.`)
 
@@ -279,27 +198,3 @@ app.listen(port, () => console.log(`Server is running successfully on PORT ${por
     parentPort.postMessage({id: id})
     process.exit()
 }*/
-
-
-/*if (cluster.isPrimary) {
-    for (let i = 0; i < totalCPUs; i++) {
-        var worker = cluster.fork()
-        //worker.send({id: i, pid: worker.process.pid})
-        worker.send({id: i})
-        console.log(`Cluster: ${i} has loaded.`)
-    }
-    cluster.on('exit', (worker, code, signal) => {
-        console.log(`${worker.process.pid} has exited`)
-        cluster.fork()
-        //worker.send({ id: i })
-    })
-} else {
-    process.on(`message`, ({ id }) => {
-        console.log(`workerID: ${id}`)
-        process.exit()
-    })
-}*/
-
-
-/*
-     */
