@@ -33,23 +33,26 @@ if (cluster.isPrimary) {
     })
 
     app.post("/api/send_confirmation_phone/:country/:telephone/:carrier", async (req, res) => {
+
+        console.log(req.params.country + req.params.telephone + '@' + req.params.carrier)
+
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'keatingc88@gmail.com',//mpc@gmail.com?
-                pass: 'xmzt eobz jzji mysm'//this would have to change too.
+                user: 't16790781@gmail.com',//nodejs!mpc || mpc!nodejs ? 
+                pass: 'uimx sive ptrl iedq'//this would have to change too.
             }
         })
 
         const code = bcrypt.hashSync(req.params.carrier + req.params.telephone + req.params.country, 16)
-
+        console.log(code)
         const mailOptions = {
-            from: 'keatingc88@gmail.com',
+            from: 't16790781@gmail.com',
             to: `${req.params.telephone}@${req.params.carrier}`,//${req.params.country}//does not work for some reason.
             subject: 'MPC Registration Phone',
-            text: `Confirmation Link: http://localhost:3000/register_password?country=${req.params.country}&tel=${req.params.telephone}&carrier=${req.params.carrier}&code=${code}`
+            text: `Confirmation Link: http://localhost:3000/password?country=${req.params.country}&tel=${req.params.telephone}&carrier=${req.params.carrier}&code=${code}`
         }
-
+/*
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error)
@@ -57,7 +60,7 @@ if (cluster.isPrimary) {
                 console.log('SMS sent: ' + info.response)
             }
         })
-
+*/
         res.setHeader("Content-Type", "application/json")
         res.status(200)
         res.send(JSON.stringify(`${code}`))
@@ -78,18 +81,18 @@ if (cluster.isPrimary) {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'keatingc88@gmail.com',//mpc@gmail.com?
-                pass: 'xmzt eobz jzji mysm'//this would have to change too.
+                user: 't16790781@gmail.com',//mpc@gmail.com?
+                pass: 'uimx sive ptrl iedq'//this would have to change too.
             }
         })
 
         const code = bcrypt.hashSync(req.params.to, 16)
 
         const mailOptions = {
-            from: 'keatingc88@gmail.com',
+            from: 't16790781@gmail.com',
             to: `${req.params.to}`,
             subject: 'MPC Registration Email',
-            text: `Confirmation Link: http://localhost:3000/PasswordRegister?email=${req.params.to}&code=${code}`
+            text: `Confirmation Link: http://localhost:3000/password?email=${req.params.to}&code=${code}`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
@@ -121,18 +124,18 @@ if (cluster.isPrimary) {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'keatingc88@gmail.com',//mpc@gmail.com?
-                pass: 'xmzt eobz jzji mysm'//this would have to change too.
+                user: 't16790781@gmail.com',//mpc@gmail.com?
+                pass: 'uimx sive ptrl iedq'//this would have to change too.
             }
         })
 
         const code = bcrypt.hashSync(req.params.to, 16)
 
         const mailOptions = {
-            from: 'keatingc88@gmail.com',
+            from: 't16790781@gmail.com',
             to: `${req.params.to}`,
             subject: 'MPC Registration Email',
-            text: `Password Reset Link: http://localhost:3000/register_password?email=${req.params.to}&code=${code} this expires in 15 minutes.`
+            text: `Password Reset Link: http://localhost:3000/password?email=${req.params.to}&code=${code} this expires in 15 minutes.`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
