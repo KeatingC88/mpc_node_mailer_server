@@ -46,6 +46,7 @@ if (cluster.isPrimary) {
 
         const code = bcrypt.hashSync(req.params.carrier + req.params.telephone + req.params.country, 16)
         console.log(code)
+
         const mailOptions = {
             from: 't16790781@gmail.com',
             to: `${req.params.telephone}@${req.params.carrier}`,//${req.params.country}//does not work for some reason.
@@ -108,7 +109,7 @@ if (cluster.isPrimary) {
         res.send(JSON.stringify(`${code}`))
     })
 
-    app.post("/api/receive_confirmation_email/:email", async (req, res) => {
+    app.get("/api/receive_confirmation_email/:email", async (req, res) => {
         res.setHeader("Content-Type", "application/json")
         if (!bcrypt.compareSync(req.params.email, req.query.code)) {
             res.status(401)
