@@ -1,12 +1,9 @@
 `use strict`
-const path = require('path')
 const express = require(`express`)
 const cluster = require(`node:cluster`)
 const totalCPUs = require("os").cpus().length
 const bcrypt = require(`bcrypt`)
-const puppeteer = require(`puppeteer`)
 const nodemailer = require(`nodemailer`)
-const axios = require(`axios`)
 const port = 8081
 //const { Worker, isMainThread, parentPort, workerData } = require('worker_threads')
 if (cluster.isPrimary) {
@@ -28,8 +25,8 @@ if (cluster.isPrimary) {
         next()
     })
 
-    app.get('*', (req, res) => {
-        res.send(JSON.stringify(`Server Ready...`))
+    app.get('*', async (req, res) => {
+        await res.send(JSON.stringify(`Server Ready...`))
     })
 
     app.post("/api/send_confirmation_phone/:country/:telephone/:carrier", async (req, res) => {
@@ -45,15 +42,14 @@ if (cluster.isPrimary) {
         })
 
         const code = bcrypt.hashSync(req.params.carrier + req.params.telephone + req.params.country, 16)
-        console.log(code)
 
         const mailOptions = {
             from: 't16790781@gmail.com',
             to: `${req.params.telephone}@${req.params.carrier}`,//${req.params.country}//does not work for some reason.
-            subject: 'MPC Registration Phone',
-            text: `Confirmation Link: http://localhost:3000/password?country=${req.params.country}&tel=${req.params.telephone}&carrier=${req.params.carrier}&code=${code}`
+            subject: 'MPC Account Confirmation URL',
+            text: `http://localhost:3000/password?country=${req.params.country}&tel=${req.params.telephone}&carrier=${req.params.carrier}`
         }
-/*
+        /*
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error)
@@ -61,7 +57,7 @@ if (cluster.isPrimary) {
                 console.log('SMS sent: ' + info.response)
             }
         })
-*/
+        */
         res.setHeader("Content-Type", "application/json")
         res.status(200)
         res.send(JSON.stringify(`${code}`))
@@ -78,35 +74,26 @@ if (cluster.isPrimary) {
         }
     })
 
-    app.post("/api/send_confirmation_email/:to", async (req, res) => {
+    app.post("/api/Send/Confirmation/Email/:language/:to", async (req, res) => {
+        const verification_access_code = bcrypt.hashSync(req.params.to, 16)
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 't16790781@gmail.com',//mpc@gmail.com?
+                user: 't16790781@gmail.com',//mpc@gmail.com
                 pass: 'uimx sive ptrl iedq'//this would have to change too.
             }
         })
-
-        const code = bcrypt.hashSync(req.params.to, 16)
-
-        const mailOptions = {
-            from: 't16790781@gmail.com',
-            to: `${req.params.to}`,
-            subject: 'MPC Registration Email',
-            text: `Confirmation Link: http://localhost:3000/password?email=${req.params.to}&code=${code}`
-        }
-
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error)
-            } else {
-                console.log('Email sent: ' + info.response)
-            }
+        transporter.sendMail({
+                from: 't16790781@gmail.com',
+                to: `${req.params.to}`,
+                subject: 'MPC Account Registration Email',
+            text: `Confirmation Link: http://localhost:3000/password?language=${req.params.language}&email=${req.params.to}&code=${verification_access_code}`
+            }, (error, info) => {
+            if (error) { console.error(error)}
         })
-
         res.setHeader("Content-Type", "application/json")
         res.status(200)
-        res.send(JSON.stringify(`${code}`))
+        res.send(JSON.stringify(`${verification_access_code}`))
     })
 
     app.get("/api/receive_confirmation_email/:email", async (req, res) => {
@@ -152,7 +139,7 @@ if (cluster.isPrimary) {
         res.send(JSON.stringify(`Email password reset has been sent to ${req.params.to}!`))
     })
 
-    app.listen(port, () => console.log(`Server is running successfully on PORT ${port}`))
+    app.listen(port, () => console.log(`NodeMailer Server: a thread is listening on PORT ${port}`))
 }
 
 /*if (isMainThread) {
