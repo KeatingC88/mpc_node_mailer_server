@@ -2,7 +2,7 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <Name>MPC_NodeMailer_Server</Name>
+    <Name>mpc_node_mailer_server</Name>
     <RootNamespace>MPC_NodeMailer_Server</RootNamespace>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -10,8 +10,9 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5b1072d2-7475-41dd-bcea-4da2ab4bc10a</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>mpc_node_mailer_server.js</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -28,7 +29,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.js" />
+    <Content Include="mpc_node_mailer_server.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
