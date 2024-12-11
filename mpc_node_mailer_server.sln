@@ -5,6 +5,11 @@ VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "mpc_node_mailer_server", "mpc_node_mailer_server.njsproj", "{5B1072D2-7475-41DD-BCEA-4DA2AB4BC10A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DB3CF903-C070-401E-8866-1F9B87E1D429}"
+	ProjectSection(SolutionItems) = preProject
+		cypress\e2e\spec.cy.js = cypress\e2e\spec.cy.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

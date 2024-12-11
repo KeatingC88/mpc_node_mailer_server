@@ -8,7 +8,16 @@
   },
   "eslintConfig": {},
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.18.2",
     "nodemailer": "^6.9.7"
+  },
+  "scripts": {
+    "start": "node mpc_node-mailer_server.js",
+    "cypress": "cypress open"
+  },
+
+  "devDependencies": {
+    "cypress": "^13.16.1"
   }
 }
