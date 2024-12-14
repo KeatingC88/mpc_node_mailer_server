@@ -4,7 +4,7 @@
   "description": "MPC_NodeMailer_Server",
   "main": "mpc_node_mailer_server.js",
   "author": {
-    "name": "chris keating 2023"
+    "name": "chris keating 2024"
   },
   "eslintConfig": {},
   "dependencies": {
