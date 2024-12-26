@@ -1,17 +1,22 @@
 `use strict`
+require('dotenv').config()
 const express = require(`express`)
 const cluster = require(`node:cluster`)
 const os_cpu_count = require("os").cpus().length
 const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting into a docker container (so docker maps inside of docker).
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
-const client_address = `http://localhost:6499`
-const port = 3001
-const SECRET_KEY = "z0nz0fb!gb0sz664"
+
+const client_address = process.env.CLIENT_ADDRESS_DEV
+const port = process.env.SERVER_PORT
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
+const LAPTOP_LAN_IP = process.env.LAPTOP_LAN_IP
+const DESKTOP_LAN_IP = process.env.DESKTOP_LAN_IP
+const LOCAL_LAN_IP = `127.0.0.1`
 
 // Encrypt function for AES-128 (16-byte key)
 const Encrypt = (value) => {
-    const cipher = crypto.createCipheriv('aes-128-ecb', Buffer.from(SECRET_KEY, 'utf-8').slice(0, 16), null);
+    const cipher = crypto.createCipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY, 'utf-8').slice(0, 16), null);
     let encrypted = cipher.update(value, 'utf-8', 'base64');
     encrypted += cipher.final('base64');
     return encrypted;
@@ -19,7 +24,7 @@ const Encrypt = (value) => {
 
 // Decrypt function for AES-128 (16-byte key)
 const Decrypt = (value) => {
-    const decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(SECRET_KEY, 'utf-8').slice(0, 16), null);
+    const decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY, 'utf-8').slice(0, 16), null);
     let decrypted = decipher.update(value, 'base64', 'utf-8');
     decrypted += decipher.final('utf-8');
     return decrypted;
@@ -57,8 +62,8 @@ if (cluster.isPrimary) {
         const transporter = await nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 't16790781@gmail.com',//mpc@gmail.com in .env file
-                pass: 'uimx sive ptrl iedq'//this would have to change too.
+                user: `${process.env.NODE_MAILER_USER}`,
+                pass: `${process.env.NODE_MAILER_PASSWORD}`
             }
         })
 
@@ -83,7 +88,6 @@ if (cluster.isPrimary) {
     app.post("/api/Received/Confirmation/Email/", async (req, res) => {
         res.setHeader("Content-Type", "application/json")
         let email_address = await Decrypt(req.body.email_address)
-        console.log(email_address)
         if (!bcrypt.compareSync(email_address, req.body.code)) {
             res.status(401)
             res.json(false)
@@ -93,5 +97,5 @@ if (cluster.isPrimary) {
         }
     })
     
-    app.listen(port, () => console.log(`NodeMailer Server: a CPU Core is listening on PORT ${port}`))
+    app.listen(port, LAPTOP_LAN_IP, () => console.log(`NodeMailer Server: a CPU Core is listening on HOST ${LAPTOP_LAN_IP} PORT ${port}`))
 }
