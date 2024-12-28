@@ -3,16 +3,14 @@ require('dotenv').config()
 const express = require(`express`)
 const cluster = require(`node:cluster`)
 const os_cpu_count = require("os").cpus().length
-const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting into a docker container (so docker maps inside of docker).
+const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting into a docker container (so docker installs from inside itself).
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
 const client_address = process.env.CLIENT_ADDRESS_DEV
-const port = process.env.SERVER_PORT
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
-const LAPTOP_LAN_IP = process.env.LAPTOP_LAN_IP
-const DESKTOP_LAN_IP = process.env.DESKTOP_LAN_IP
-const LOCAL_LAN_IP = `127.0.0.1`
+const network_socket_port = process.env.SERVER_PORT | 3001
+const network_ip_address = `192.168.0.102`
 
 // Encrypt function for AES-128 (16-byte key)
 const Encrypt = (value) => {
@@ -50,7 +48,7 @@ if (cluster.isPrimary) {
     })
 
     app.get('*', async (req, res) => {
-        await res.send(JSON.stringify(`Ready...`))
+        await res.send(JSON.stringify(`Server Ready...`))
     })
 
     app.post("/api/Send/Confirmation/Email/", async (req, res) => {
@@ -68,7 +66,7 @@ if (cluster.isPrimary) {
         })
 
         await transporter.sendMail({
-            from: 't16790781@gmail.com',
+            from: `${process.env.NODE_MAILER_USER}`,
             to: `${email_address}`,
             subject: 'MPC Account Registration Email',
             text: `Confirmation Link: ${client_address}/password?language=${language}-${region}&email=${email_address}&code=${verification_access_code}`
@@ -97,5 +95,5 @@ if (cluster.isPrimary) {
         }
     })
     
-    app.listen(port, LAPTOP_LAN_IP, () => console.log(`NodeMailer Server: a CPU Core is listening on HOST ${LAPTOP_LAN_IP} PORT ${port}`))
+    app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core ${os_cpu_count} is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket PORT ${network_socket_port}`))
 }
