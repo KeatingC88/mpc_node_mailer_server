@@ -95,5 +95,5 @@ if (cluster.isPrimary) {
         }
     })
     
-    app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core ${os_cpu_count} is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket PORT ${network_socket_port}`))
+    app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket PORT ${network_socket_port}`))
 }
