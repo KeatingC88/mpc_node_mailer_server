@@ -101,7 +101,7 @@ if (cluster.isPrimary) {
             from: `${process.env.NODE_MAILER_USER}`,
             to: `${email_address}`,
             subject: 'MPC Account Registration Attempt',
-            text: `There's been an attempt to re-register your account from \nIP: ${ip_address}\nLanguage: ${language}\nRegion: ${region}.\nNotify an Admin if the issue persists and was not you.'`
+            text: `There's been an attempt to re-register your account from \nIP Address: ${ip_address}\nLanguage: ${language}\nRegion: ${region}.\nNotify an Admin if the issue persists and was NOT you.`
         }, (error) => {
             if (error) {
                 res.setHeader("Content-Type", "application/json")
