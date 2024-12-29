@@ -83,6 +83,43 @@ if (cluster.isPrimary) {
         res.json({code: `${verification_access_code}`})
     })
 
+    app.post("/api/Send/Notification/Email/", async (req, res) => {
+        let email_address = await Decrypt(req.body.email_address)
+        let language = await Decrypt(req.body.language)
+        let region = await Decrypt(req.body.region)
+        const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        console.log({
+            email_address: email_address,
+            language: language,
+            region: region,
+            ip_address: ip_address
+        })
+
+        const transporter = await nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: `${process.env.NODE_MAILER_USER}`,
+                pass: `${process.env.NODE_MAILER_PASSWORD}`
+            }
+        })
+
+        await transporter.sendMail({
+            from: `${process.env.NODE_MAILER_USER}`,
+            to: `${email_address}`,
+            subject: 'MPC Account Registration Attempt',
+            text: `There's been an attempt to re-register your account. Notify an Admin if the issue persists and was not you.'`
+        }, (error) => {
+            if (error) {
+                res.setHeader("Content-Type", "application/json")
+                res.status(500)
+                res.json(false)
+            }
+        })
+        res.status(200)
+        res.json(true)
+    })
+
     app.post("/api/Received/Confirmation/Email/", async (req, res) => {
         res.setHeader("Content-Type", "application/json")
         let email_address = await Decrypt(req.body.email_address)
