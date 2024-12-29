@@ -89,13 +89,6 @@ if (cluster.isPrimary) {
         let region = await Decrypt(req.body.region)
         const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
-        console.log({
-            email_address: email_address,
-            language: language,
-            region: region,
-            ip: ip_address
-        })
-
         const transporter = await nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -108,7 +101,7 @@ if (cluster.isPrimary) {
             from: `${process.env.NODE_MAILER_USER}`,
             to: `${email_address}`,
             subject: 'MPC Account Registration Attempt',
-            text: `There's been an attempt to re-register your account. Notify an Admin if the issue persists and was not you.'`
+            text: `There's been an attempt to re-register your account from \nIP: ${ip_address}\nLanguage: ${language}\nRegion: ${region}.\nNotify an Admin if the issue persists and was not you.'`
         }, (error) => {
             if (error) {
                 res.setHeader("Content-Type", "application/json")
