@@ -87,13 +87,13 @@ if (cluster.isPrimary) {
         let email_address = await Decrypt(req.body.email_address)
         let language = await Decrypt(req.body.language)
         let region = await Decrypt(req.body.region)
-        const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
         console.log({
             email_address: email_address,
             language: language,
             region: region,
-            ip_address: ip_address
+            ip: ip_address
         })
 
         const transporter = await nodemailer.createTransport({
