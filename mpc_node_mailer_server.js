@@ -88,6 +88,8 @@ if (cluster.isPrimary) {
         let language = await Decrypt(req.body.language)
         let region = await Decrypt(req.body.region)
         const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+        let client_time = await Decrypt(req.body.client_time)
+        let location = await Decrypt(req.body.location)
 
         const transporter = await nodemailer.createTransport({
             service: 'gmail',
@@ -101,7 +103,13 @@ if (cluster.isPrimary) {
             from: `${process.env.NODE_MAILER_USER}`,
             to: `${email_address}`,
             subject: 'MPC Account Registration Attempt',
-            text: `There's been an attempt to re-register your account from \nIP Address: ${ip_address}\nLanguage: ${language}\nRegion: ${region}.\nNotify an Admin if the issue persists and was NOT you.`
+            text: `There's been an attempt to re-register your email account from 
+            \nIP Address: ${ip_address}
+            \nLanguage: ${language}
+            \nRegion: ${region}
+            \nDevice Time Captured:${client_time}
+            \nLocation:${location}
+            \nNotify an MPC Admin if the issue persists and was NOT you.`
         }, (error) => {
             if (error) {
                 res.setHeader("Content-Type", "application/json")

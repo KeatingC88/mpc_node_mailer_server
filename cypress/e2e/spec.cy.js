@@ -1,38 +1,11 @@
 let code = ``
+let server_address = `http://192.168.0.102:3001`
 
-describe('mpc_node_mailer_server: General Response', () => {
-    it('Testing Server General Response and Port...', () => {
-        cy.request(`GET`, `http://localhost:3001/`, {}).then((response) => {
+describe('mpc_node_mailer_server: General Responses from Servers', () => {
+    it('Testing Server General Network IP and Port...', () => {
+        cy.request(`GET`, server_address, {}).then((response) => {
             expect(response.status).to.eq(200)
             expect(response.body).to.be.a('string').and.not.be.empty;
         })
     })
 })
-
-/*describe('mpc_node_mailer_server: Verification Code Response', () => {
-    it('Testing Server a Verification Code...', () => {
-        cy.request(`POST`, `http://localhost:3001/api/Send/Confirmation/Email/`, {
-            email_address: `local@email.com`,
-            language: `en`,
-            region: `US`,
-        }).then((response) => {
-            expect(response.status).to.eq(200)
-            expect(response.body).to.have.property(`code`)
-            expect(response.body.code).to.be.a('string').and.not.be.empty;
-            code = response.body.code
-        })
-    })
-})
-
-describe('mpc_node_mailer_server: Confirmation Code Response', () => {
-    it('Testing Successful Response...', () => {
-        cy.request(`GET`, `http://localhost:3001/api/Recieved/Confirmation/Email/`, {
-            email_address: `local@email.com`,
-            code: code
-        }).then((response) => {
-            expect(response.status).to.eq(200)
-            console.log(response)
-        })
-    })
-    
-})*/
