@@ -107,8 +107,8 @@ if (cluster.isPrimary) {
             \nIP Address: ${ip_address}
             \nLanguage: ${language}
             \nRegion: ${region}
-            \nDevice Time Captured:${client_time}
-            \nLocation:${location}
+            \nDevice Time Captured: ${new Date(client_time).toISOString() }
+            \nLocation: ${location}
             \nNotify an MPC Admin if the issue persists and was NOT you.`
         }, (error) => {
             if (error) {
