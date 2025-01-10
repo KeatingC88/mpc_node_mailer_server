@@ -55,7 +55,14 @@ if (cluster.isPrimary) {
         let email_address = await Decrypt(req.body.email_address)
         let language = await Decrypt(req.body.language)
         let region = await Decrypt(req.body.region)
+
         const verification_access_code = await bcrypt.hashSync(email_address, 16)
+
+        do {
+            if (verification_access_code.charAt(verification_access_code.length - 1) === ".") {
+                verification_access_code = await bcrypt.hashSync(email_address, 16);
+            }
+        } while (verification_access_code.charAt(verification_access_code.length - 1) != ".");
 
         const transporter = await nodemailer.createTransport({
             service: 'gmail',
