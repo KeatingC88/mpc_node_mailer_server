@@ -56,7 +56,7 @@ if (cluster.isPrimary) {
         let language = await Decrypt(req.body.language)
         let region = await Decrypt(req.body.region)
 
-        const verification_access_code = await bcrypt.hashSync(email_address, 16)
+        let verification_access_code = await bcrypt.hashSync(email_address, 16)
 
         do {
             if (verification_access_code.charAt(verification_access_code.length - 1) === ".") {
