@@ -8,16 +8,10 @@ const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting int
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
-//const client_address = process.env.CLIENT_ADDRESS_DEV
-//const client_address = process.env.CLIENT_ADDRESS_192_168_0_102_6499
+const client_address = process.env.CLIENT_ADDRESS_DEV
 const encryption_key = process.env.ENCRYPTION_KEY
-//const network_socket_port = process.env.SERVER_PORT
-//const network_ip_address = process.env.SERVER_ADDRESS_192_168_0_102
-//const network_ip_address = process.env.SERVER_ADDRESS_DEV
-const network_socket_port = 3001
-//const network_ip_address = `192.168.0.102`
-const network_ip_address = `127.0.0.1`
-const client_address = `127.0.0.1`
+const network_socket_port = process.env.SERVER_PORT
+const network_ip_address = process.env.SERVER_ADDRESS_DEV
 
 // Encrypt function for AES-128 (16-byte key)
 const Encrypt = (value) => {
