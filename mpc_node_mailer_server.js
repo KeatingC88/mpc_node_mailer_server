@@ -8,15 +8,16 @@ const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting int
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
-const client_address = process.env.CLIENT_ADDRESS_DEV
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
-
-let network_socket_port = process.env.SERVER_PORT | 3001
-let network_ip_address = ``
+//const client_address = process.env.CLIENT_ADDRESS_DEV
+const client_address = process.env.CLIENT_ADDRESS_192_168_0_102_6499
+const encryption_key = process.env.ENCRYPTION_KEY
+const network_socket_port = process.env.SERVER_PORT
+const network_ip_address = process.env.SERVER_ADDRESS_192_168_0_102
+//const network_ip_address = process.env.SERVER_ADDRESS_DEV
 
 // Encrypt function for AES-128 (16-byte key)
 const Encrypt = (value) => {
-    const cipher = crypto.createCipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY, 'utf-8').slice(0, 16), null);
+    const cipher = crypto.createCipheriv('aes-128-ecb', Buffer.from(encryption_key, 'utf-8').slice(0, 16), null);
     let encrypted = cipher.update(value, 'utf-8', 'base64');
     encrypted += cipher.final('base64');
     return encrypted;
@@ -24,7 +25,7 @@ const Encrypt = (value) => {
 
 // Decrypt function for AES-128 (16-byte key)
 const Decrypt = (value) => {
-    const decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(ENCRYPTION_KEY, 'utf-8').slice(0, 16), null);
+    const decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(encryption_key, 'utf-8').slice(0, 16), null);
     let decrypted = decipher.update(value, 'base64', 'utf-8');
     decrypted += decipher.final('utf-8');
     return decrypted;
@@ -45,7 +46,8 @@ const local_ip_address = () => {
 }
 
 try {
-    network_ip_address = `${local_ip_address()}`
+    if (network_ip_address === ``)
+        network_ip_address = `${local_ip_address()}`
 
     if (cluster.isPrimary) {
         for (let i = 0; i < os_cpu_count; i++) {
@@ -67,7 +69,9 @@ try {
         })
 
         app.get('*', async (req, res) => {
+
             await res.send(JSON.stringify(`Server Ready...`))
+
         })
 
         app.post("/api/Send/Confirmation/Email/", async (req, res) => {
@@ -116,6 +120,7 @@ try {
             const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress
             let client_time = await Decrypt(req.body.client_time)
             let location = await Decrypt(req.body.location)
+            let user_agent = await Decrypt(req.body.user_agent)
 
             const transporter = await nodemailer.createTransport({
                 service: 'gmail',
@@ -135,13 +140,10 @@ try {
                         \nRegion: ${region}
                         \nDevice Time Captured: ${new Date(parseInt(client_time)).toISOString()}
                         \nLocation: ${location}
+                        \nDevice Information: ${user_agent}
                         \nNotify an Admin if the issue persists and was NOT you at {website}.`
             }, (error) => {
-                if (error) {
-                    res.setHeader("Content-Type", "application/json")
-                    res.status(500)
-                    res.json(false)
-                }
+                
             })
             res.status(200)
             res.json(true)
