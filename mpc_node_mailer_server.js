@@ -11,7 +11,7 @@ const crypto = require('crypto')
 const client_address = process.env.CLIENT_ADDRESS_DEV
 const encryption_key = process.env.ENCRYPTION_KEY
 const network_socket_port = process.env.SERVER_PORT
-const network_ip_address = process.env.SERVER_ADDRESS_DEV
+let network_ip_address = `auto`
 
 // Encrypt function for AES-128 (16-byte key)
 const Encrypt = (value) => {
@@ -44,7 +44,7 @@ const local_ip_address = () => {
 }
 
 try {
-    if (network_ip_address === ``)
+    if (network_ip_address === `auto`)
         network_ip_address = `${local_ip_address()}`
 
     if (cluster.isPrimary) {
