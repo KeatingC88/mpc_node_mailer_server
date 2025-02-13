@@ -8,7 +8,7 @@ const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting int
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
-const client_address = process.env.CLIENT_ADDRESS_DEV
+const client_address = process.env.CLIENT_ADDRESS_192_168_0_102_6499
 const encryption_key = process.env.ENCRYPTION_KEY
 const network_socket_port = process.env.SERVER_PORT
 let network_ip_address = `auto`
@@ -67,9 +67,7 @@ try {
         })
 
         app.get('*', async (req, res) => {
-
-            await res.send(JSON.stringify(`Server Ready...`))
-
+            await res.send(JSON.stringify(`Ready...`))
         })
 
         app.post("/api/Send/Confirmation/Email/", async (req, res) => {
@@ -159,7 +157,7 @@ try {
             }
         })
 
-        app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket PORT ${network_socket_port}\n`))
+        app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket Port ${network_socket_port}\nClient Address ${client_address}`))
     }
 } catch (err) {
     console.error('Error:', err)
