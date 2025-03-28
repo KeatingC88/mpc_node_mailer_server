@@ -1,0 +1,1 @@
+docker compose -f mpc_node_mailer_server.yaml up -d
