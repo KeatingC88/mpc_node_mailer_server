@@ -363,4 +363,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/.env.txt
+.env
+docker-startup-cmds-cli.txt
+*.sln
+*.njsproj
+*.jsproj.sln

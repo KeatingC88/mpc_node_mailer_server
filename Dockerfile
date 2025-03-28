@@ -16,7 +16,7 @@ RUN npm install && \
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 3001
+EXPOSE ${SERVER_PORT}
 
 # Define the command to run the app
 CMD ["node", "mpc_node_mailer_server.js"]

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  mpc_node_mailer_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_CONTAINER_IMAGE_NAME}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    container_name: ${DOCKER_CONTAINER_NAME}
+    restart: always

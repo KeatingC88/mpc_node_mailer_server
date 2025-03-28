@@ -8,28 +8,28 @@ const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting int
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
-const client_address = process.env.CLIENT_ADDRESS_192_168_0_102_6499
-const encryption_key = process.env.ENCRYPTION_KEY
+const redirect_client_url_address = process.env.CLIENT_ADDRESS_DEV
 const network_socket_port = process.env.SERVER_PORT
+
 let network_ip_address = `auto`
 
-// Encrypt function for AES-128 (16-byte key)
-const Encrypt = (value) => {
-    const cipher = crypto.createCipheriv('aes-128-ecb', Buffer.from(encryption_key, 'utf-8').slice(0, 16), null);
-    let encrypted = cipher.update(value, 'utf-8', 'base64');
-    encrypted += cipher.final('base64');
-    return encrypted;
-}
+const encryption_key = process.env.ENCRYPTION_KEY
+const encryption_type = process.env.ENCRYPTION_TYPE
+const encryption_format = process.env.ENCRYPTION_FORMAT
+const encryption_base = process.env.ENCRYPTION_BASE
+const encryption_iv = process.env.ENCRYPTION_IV
+const encryption_hash = process.env.ENCRYPTION_HASH
 
-// Decrypt function for AES-128 (16-byte key)
 const Decrypt = (value) => {
-    const decipher = crypto.createDecipheriv('aes-128-ecb', Buffer.from(encryption_key, 'utf-8').slice(0, 16), null);
-    let decrypted = decipher.update(value, 'base64', 'utf-8');
-    decrypted += decipher.final('utf-8');
+    const key = crypto.createHash(`${encryption_hash}`).update(`${encryption_key}`, `${encryption_format}`).digest();
+    const iv = Buffer.from(`${encryption_iv}`, `${encryption_format}`);
+    const decipher = crypto.createDecipheriv(`${encryption_type}`, key, iv);
+    let decrypted = decipher.update(value, `${encryption_base}`, `${encryption_format}`);
+    decrypted += decipher.final(`${encryption_format}`);
     return decrypted;
-}
+};
 
-const local_ip_address = () => {
+const get_hardware_ethernet_local_ip_address = () => {
     const networkInterfaces = os.networkInterfaces()
     for (const interfaceName in networkInterfaces) {
         if (interfaceName.toLowerCase().includes('eth') || interfaceName.toLowerCase() === 'ethernet') {
@@ -44,17 +44,21 @@ const local_ip_address = () => {
 }
 
 try {
+
     if (network_ip_address === `auto`)
-        network_ip_address = `${local_ip_address()}`
+        network_ip_address = `${get_hardware_ethernet_local_ip_address()}`
 
     if (cluster.isPrimary) {
+
         for (let i = 0; i < os_cpu_count; i++) {
             cluster.fork()
         }
         cluster.on('exit', (worker, code, signal) => {
             cluster.fork()
         })
+
     } else {
+
         const app = express()
         app.use(express.static('client/build'))
         app.use(express.json())
@@ -71,6 +75,7 @@ try {
         })
 
         app.post("/api/Send/Confirmation/Email/", async (req, res) => {
+
             let email_address = await Decrypt(req.body.email_address)
             let language = await Decrypt(req.body.language)
             let region = await Decrypt(req.body.region)
@@ -95,7 +100,7 @@ try {
                 from: `${process.env.NODE_MAILER_USER}`,
                 to: `${email_address}`,
                 subject: 'MPC Account Registration Email',
-                text: `Confirmation Link: http://${client_address}/password?language=${language}-${region}&email=${email_address}&code=${verification_access_code}`
+                text: `Confirmation Link: http://${redirect_client_url_address}/password?language=${language}-${region}&email=${email_address}&code=${verification_access_code}`
             }, (error, info) => {
                 if (error) {
                     res.setHeader("Content-Type", "application/json")
@@ -110,6 +115,7 @@ try {
         })
 
         app.post("/api/Send/Notification/Email/", async (req, res) => {
+
             let email_address = await Decrypt(req.body.email_address)
             let language = await Decrypt(req.body.language)
             let region = await Decrypt(req.body.region)
@@ -157,8 +163,8 @@ try {
             }
         })
 
-        app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket Port ${network_socket_port}\nClient Address ${client_address}`))
+        app.listen(network_socket_port, network_ip_address, () => console.log(`Node Mailer Server:\na CPU Core is listening on \nNetwork IP Address ${network_ip_address} \nNetwork Socket Port ${network_socket_port}\nClient Address ${redirect_client_url_address}`))
     }
 } catch (err) {
-    console.error('Error:', err)
+    console.error('Server Startup Error: ', err)
 }
