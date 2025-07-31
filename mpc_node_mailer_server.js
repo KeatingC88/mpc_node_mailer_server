@@ -4,14 +4,14 @@ const os = require("os")
 const os_cpu_count = os.cpus().length
 const express = require(`express`)
 const cluster = require(`node:cluster`)
-const bcrypt = require(`bcrypt`)//must be uninstalled locally before putting into a docker container (so docker installs from inside itself).
+const bcrypt = require(`bcrypt`)
 const nodemailer = require(`nodemailer`)
 const crypto = require('crypto')
 
 const redirect_client_url_address = process.env.CLIENT_ADDRESS_DEV
 const network_socket_port = process.env.SERVER_PORT
 
-let network_ip_address = `auto`
+let network_ip_address = `auto`//127.0.0.1
 
 const encryption_key = process.env.ENCRYPTION_KEY
 const encryption_type = process.env.ENCRYPTION_TYPE
@@ -21,13 +21,13 @@ const encryption_iv = process.env.ENCRYPTION_IV
 const encryption_hash = process.env.ENCRYPTION_HASH
 
 const Decrypt = (value) => {
-    const key = crypto.createHash(`${encryption_hash}`).update(`${encryption_key}`, `${encryption_format}`).digest();
-    const iv = Buffer.from(`${encryption_iv}`, `${encryption_format}`);
-    const decipher = crypto.createDecipheriv(`${encryption_type}`, key, iv);
-    let decrypted = decipher.update(value, `${encryption_base}`, `${encryption_format}`);
-    decrypted += decipher.final(`${encryption_format}`);
-    return decrypted;
-};
+    const key = crypto.createHash(`${encryption_hash}`).update(`${encryption_key}`, `${encryption_format}`).digest()
+    const iv = Buffer.from(`${encryption_iv}`, `${encryption_format}`)
+    const decipher = crypto.createDecipheriv(`${encryption_type}`, key, iv)
+    let decrypted = decipher.update(value, `${encryption_base}`, `${encryption_format}`)
+    decrypted += decipher.final(`${encryption_format}`)
+    return decrypted
+}
 
 const get_hardware_ethernet_local_ip_address = () => {
     const networkInterfaces = os.networkInterfaces()
@@ -86,7 +86,7 @@ try {
                 if (verification_access_code.charAt(verification_access_code.length - 1) === ".") {
                     verification_access_code = await bcrypt.hashSync(email_address, 16);
                 }
-            } while (verification_access_code.charAt(verification_access_code.length - 1) === ".");
+            } while (verification_access_code.charAt(verification_access_code.length - 1) === ".")
 
             const transporter = await nodemailer.createTransport({
                 service: 'gmail',
@@ -100,7 +100,7 @@ try {
                 from: `${process.env.NODE_MAILER_USER}`,
                 to: `${email_address}`,
                 subject: 'MPC Account Registration Email',
-                text: `Confirmation Link: http://${redirect_client_url_address}/password?language=${language}-${region}&email=${email_address}&code=${verification_access_code}`
+                text: `Confirmation Link: http://${redirect_client_url_address}/Register/Email/Password?language=${language}-${region}&email=${email_address}&code=${verification_access_code}`
             }, (error, info) => {
                 if (error) {
                     res.setHeader("Content-Type", "application/json")
